@@ -5,7 +5,9 @@ import re
 from collections import Counter
 
 
+
 file_path = os.path.join(os.getcwd(), 'book_to_film.csv')
+output = os.path.join(os.getcwd(), 'output/metadata_book_film.csv')
 
 book_to_film = pd.read_csv(file_path)
 
@@ -73,4 +75,7 @@ book_to_film['book_title'] = book_to_film['book_info'].apply(get_author)
 # FILM METADATA
 book_to_film['film_year'] = book_to_film['movie_info'].apply(get_year)
 book_to_film['film_title'] = book_to_film['movie_info'].apply(get_film_title)
+
+
+book_to_film.to_csv(output)
 
