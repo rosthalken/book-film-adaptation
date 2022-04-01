@@ -1,0 +1,132 @@
+---
+title: "Create Figures"
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r}
+library(dplyr)
+library(ggplot2)
+library(ggrepel)
+
+working_dir <- "/Users/rosamondthalken/Documents/Projects/book-film-adaptation/"
+```
+
+
+```{r}
+connected_metadata_df <- read.csv(paste0(working_dir, 'data/', 'connected_metadata.csv'))
+connected_metadata_df$votes_film <- as.numeric(gsub(",","",connected_metadata_df$votes_film))
+```
+
+```{r}
+connected_metadata_df["votes_film_zscore"] <- scale(connected_metadata_df["votes_film"]) 
+connected_metadata_df["votes_book_zscore"] <- scale(connected_metadata_df["num_ratings_book"]) 
+```
+
+```{r}
+scatter_plot_ratings <- function(df, x_col, y_col, label_col, size_col, working_dir) {
+  ggplot(df, 
+       aes(x=x_col, 
+           y=y_col, 
+           label = label_col, 
+           size = size_col)) +
+  geom_point(alpha = .4, color = "#00A1C9", show.legend = F) +
+  geom_text(
+    data = df[df$size_col > 100000,],
+    nudge_y = .1,
+    show.legend = F,
+    size = 4.5,
+    check_overlap = TRUE
+  ) +
+  ylim(-3, 3) +
+  xlim(-2, 3) +
+  theme_classic() +
+  ylab("Book Rating (z-score)") +
+  xlab("Film Rating (z-score)") +
+  ggsave(paste0(working_dir, "output/figures/ratings.png"), width = 12, height = 9, dpi = "print")
+}
+
+scatter_plot_ratings(connected_metadata_df, 
+                     x= connected_metadata_df$users_rating_film_zscore, 
+                     y= connected_metadata_df$average_rating_book_zscore, 
+                     label_col = connected_metadata_df$film_title, 
+                     size_col = connected_metadata_df$votes_film,
+                     working_dir = working_dir)
+```
+
+
+
+```{r}
+ggplot(connected_metadata_df, 
+       aes(x=users_rating_film_zscore, 
+           y=average_rating_book_zscore, 
+           color = num_ratings_book,
+           label = film_title, 
+           size = num_ratings_book)) +
+  geom_point(alpha = .6, show.legend = F) +
+  scale_colour_gradient(low = "#45818e", high = "#741b47") +
+  ylim(-3, 3) +
+  xlim(-2, 3) +
+  theme_classic() +
+  ylab("Book Rating (z-score)") +
+  xlab("Film Rating (z-score)") +
+  ggsave(paste0(working_dir, "output/figures/ratings_book_popularity.png"), width = 12, height = 9, dpi = "print")
+```
+
+```{r}
+ggplot(connected_metadata_df, 
+       aes(x=users_rating_film_zscore, 
+           y=average_rating_book_zscore, 
+           color = votes_film, 
+           label = film_title, 
+           size = votes_film)) +
+  geom_point(alpha = .6, show.legend = F) +
+  scale_colour_gradient(low = "#45818e", high = "#741b47") +
+  ylim(-3, 3) +
+  xlim(-2, 3) +
+  theme_classic() +
+  ylab("Book Rating (z-score)") +
+  xlab("Film Rating (z-score)") +
+  ggsave(paste0(working_dir, "output/figures/ratings_film_popularity.png"), width = 12, height = 9, dpi = "print")
+```
+
+
+```{r}
+ggplot(connected_metadata_df, 
+       aes(x=users_rating_film_zscore, 
+           y=average_rating_book_zscore, 
+           label = film_title, 
+           size = votes_film)) +
+  geom_point(alpha = .4, color = "#00A1C9", show.legend = F) +
+  geom_text(
+    data = connected_metadata_df[connected_metadata_df$votes_film > 100000,],
+    nudge_y = .1,
+    show.legend = F,
+    size = 4.5,
+    check_overlap = TRUE
+  ) +
+  ylim(-3, 3) +
+  xlim(-2, 3) +
+  theme_classic() +
+  ylab("Book Rating (z-score)") +
+  xlab("Film Rating (z-score)") +
+  ggsave(paste0(working_dir, "output/figures/ratings.png"), width = 12, height = 9, dpi = "print")
+```
+
+
+```{r}
+year_df <- read.csv(paste0(working_dir, 'output/year_df.csv'))
+
+
+year_df %>%
+  ggplot( aes(x=year, fill=media)) +
+  geom_histogram( color="#e9ecef", alpha=0.7, position = 'identity', binwidth = 10) +
+  scale_fill_manual(values=c("#404080","#69b3a2")) +
+  labs(fill="") +
+  theme_classic() +
+  ylab("Count") +
+  xlab("Decades") +
+  ggsave(paste0(working_dir, "output/figures/years.png"), width = 12, height = 9, dpi = "print")
+
+```
+
